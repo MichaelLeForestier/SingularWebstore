@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect  } from "react";
 import { Link, RouteComponentProps } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
@@ -21,25 +21,52 @@ import InputLabel from "@mui/material/InputLabel";
 import InputAdornment from "@mui/material/InputAdornment";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormControl from "@mui/material/FormControl";
-
+import MenuItem from '@mui/material/MenuItem';
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 type SignUpProps = RouteComponentProps;
 
 const SignUp: FC<SignUpProps> = ({ history }) => {
+  const AddressTypes = [
+    {
+      value: 'House',
+      label: 'House',
+    },
+    {
+      value: 'Apartment',
+      label: 'Apartment',
+    },
+    {
+      value: 'Townhouse/Complex',
+      label: 'Townhouse/Complex',
+    },
+    
+  ];
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
+    watch,
+    control,
   } = useForm();
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
 
+  useEffect(() => {
+    setPasswordsMatch(
+      watch("password") === watch("confirmPassword")
+    );
+  }, [watch("password"), watch("confirmPassword")]);
+  
+ 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleClickShowConfirmPassword = () =>
     setShowConfirmPassword(!showConfirmPassword);
+    const [selectedAddressType, setSelectedAddressType] = useState('House'); // Initialize with a default value
 
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
@@ -48,6 +75,21 @@ const SignUp: FC<SignUpProps> = ({ history }) => {
   };
 
   const submitData = (data: any) => {
+    
+  //     const requestData = {
+  //   email: data.email,
+  //   password: data.password,
+  //   confirmPassword: data.confirmPassword,
+  //   name: data.name,
+  //   surname: data.surname,
+  //   addressType: data.addressType,
+  //   streetAddress: data.streetAddress,
+  //   suburb: data.suburb,
+  //   cityTown: data.city,
+  //   postalCode: data.postalCode,
+  //   phoneNumber: data.phoneNumber,
+  // };
+    console.log(data);
     axios
       .post("https://localhost:7198/api/User/register", data)
       .then(function (response) {
@@ -67,7 +109,7 @@ const SignUp: FC<SignUpProps> = ({ history }) => {
         }, 3000);
       })
       .catch(function (error) {
-        console.log(error);
+        // console.log(error);
       });
   };
 
@@ -90,10 +132,10 @@ const SignUp: FC<SignUpProps> = ({ history }) => {
                 label="First Name"
                 variant="outlined"
                 fullWidth
-                {...register("firstName", {
+                {...register("name", {
                   required: "First Name is required!",
                 })}
-                error={Boolean(errors.firstName)}
+                error={Boolean(errors.name)}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -101,79 +143,112 @@ const SignUp: FC<SignUpProps> = ({ history }) => {
                 label="Last Name"
                 variant="outlined"
                 fullWidth
-                {...register("lastName", {
+                {...register("surname", {
                   required: "Last Name is required!",
                 })}
-                error={Boolean(errors.lastName)}
+                error={Boolean(errors.surname)}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                label="Email"
-                variant="outlined"
-                fullWidth
-                {...register("email", { required: "Email is required!" })}
-                error={Boolean(errors.email)}
+                 label="Email"
+                 variant="outlined"
+                 fullWidth
+                 {...register("email", {
+                   required: "Email is required!",
+                   pattern: {
+                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                     message: "Invalid email address",
+                   },
+                 })}
+                 error={Boolean(errors.email)}
+                 
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControl variant="outlined" fullWidth>
-                <InputLabel htmlFor="outlined-adornment-password">
-                  Password
-                </InputLabel>
-                <OutlinedInput
-                  id="outlined-adornment-password"
-                  type={showPassword ? "text" : "password"}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Password"
-                />
-              </FormControl>
+            <FormControl variant="outlined" fullWidth>
+  <InputLabel htmlFor="outlined-adornment-password">
+    Password
+  </InputLabel>
+  <OutlinedInput
+    id="outlined-adornment-password"
+    type={showPassword ? "text" : "password"}
+    endAdornment={
+      <InputAdornment position="end">
+        <IconButton
+          aria-label="toggle password visibility"
+          onClick={handleClickShowPassword}
+          onMouseDown={handleMouseDownPassword}
+          edge="end"
+        >
+          {showPassword ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      </InputAdornment>
+    }
+    label="Password"
+    {...register("password", {
+      required: "Password is required!",
+      validate: validatePassword, // Use your custom validation function here
+    })}
+    error={Boolean(errors.password)}
+  />
+</FormControl>
             </Grid>
             <Grid item xs={12}>
-              <FormControl variant="outlined" fullWidth>
-                <InputLabel htmlFor="outlined-adornment-confirm-password">
-                  Confirm Password
-                </InputLabel>
-                <OutlinedInput
-                  id="outlined-adornment-confirm-password"
-                  type={showConfirmPassword ? "text" : "password"}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle confirm password visibility"
-                        onClick={handleClickShowConfirmPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label="Confirm Password"
-                />
-              </FormControl>
+            <FormControl variant="outlined" fullWidth>
+              <InputLabel htmlFor="outlined-adornment-confirm-password">
+                Confirm Password
+              </InputLabel>
+              <OutlinedInput
+                id="outlined-adornment-confirm-password"
+                type={showConfirmPassword ? "text" : "password"}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle confirm password visibility"
+                      onClick={handleClickShowConfirmPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+                label="Confirm Password"
+                {...register("confirmPassword", {
+                  required: "Confirm Password is required!",
+                  validate: (value: string) => {
+                    return value === watch("password") || "Passwords do not match";
+                  },
+                })}
+                error={!passwordsMatch || Boolean(errors.confirmPassword)}
+              />
+              {!passwordsMatch && (
+                <FormHelperText error={true}>
+                  Passwords do not match
+                </FormHelperText>
+              )}
+            </FormControl>
+
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                label="Address Type"
-                variant="outlined"
-                fullWidth
-                {...register("addressType", {
-                  required: "Address Type is required!",
-                })}
-                error={Boolean(errors.addressType)}
-              />
+            <TextField
+              id="outlined-select-AddressType"
+              select
+              label="Address type"
+              defaultValue="House"
+              {...register("addressType", {
+                required: "Address Type is required!",
+              })}
+              error={!passwordsMatch || Boolean(errors.addressType)}
+              fullWidth
+            >
+              {AddressTypes.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -202,10 +277,10 @@ const SignUp: FC<SignUpProps> = ({ history }) => {
                 label="City"
                 variant="outlined"
                 fullWidth
-                {...register("city", {
+                {...register("cityTown", {
                   required: "City is required!",
                 })}
-                error={Boolean(errors.city)}
+                error={Boolean(errors.cityTown)}
               />
             </Grid>
             <Grid item xs={12}>

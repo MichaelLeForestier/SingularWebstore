@@ -58,6 +58,34 @@ namespace Service.Services
             // Execute the query and return the results
             return await query.ToListAsync();
         }
+        public async Task<bool> DeleteStoreItemAsync(int storeItemId)
+        {
+            // Find the store item by ID
+            var storeItem = await _context.StoreItems.FindAsync(storeItemId);
+
+            if (storeItem == null)
+            {
+                // If the item is not found, return false
+                return false;
+            }
+
+            try
+            {
+                // Remove the store item from the context
+                _context.StoreItems.Remove(storeItem);
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+
+                // Return true to indicate successful deletion
+                return true;
+            }
+            catch (Exception)
+            {
+                // Handle any exceptions, log them, and return false
+                return false;
+            }
+        }
 
 
     }

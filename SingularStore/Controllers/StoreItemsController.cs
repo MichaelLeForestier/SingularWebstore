@@ -82,5 +82,29 @@ namespace SingularStore.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+        [HttpDelete("DeleteStoreItem/{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteStoreItem(int id)
+        {
+            try
+            {
+                var deletionResult = await _storeItemService.DeleteStoreItemAsync(id);
+
+                if (deletionResult)
+                {
+                    return NoContent(); // Successfully deleted
+                }
+                else
+                {
+                    return NotFound($"Store item with ID {id} not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
     }
 }

@@ -27,6 +27,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped(typeof(UserService));
             services.AddScoped(typeof(AuthenticationService));
             services.AddScoped(typeof(StoreItemService));
+            services.AddScoped(typeof(CartService));
+
 
 
 

@@ -6,9 +6,6 @@ namespace Domain.DTO
 {
     public class RegisterDto
     {
-        [Required(ErrorMessage = "The UserName field is required.")]
-        [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at most {1} characters long.", MinimumLength = 6)]
-        public string UserName { get; set; }
 
         [Required(ErrorMessage = "The Email field is required.")]
         [EmailAddress(ErrorMessage = "Invalid email address.")]
